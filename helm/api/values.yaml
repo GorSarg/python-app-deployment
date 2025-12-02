@@ -1,0 +1,26 @@
+image:
+  repository: cool-api
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5000
+
+replicaCount: 1
+
+configMap:
+  enabled: true
+  data:
+    PORT: "5000"
+    ENV: "development"
+
+secret:
+  enabled: true
+  data:
+    MONGODB_URI: "mongodb://cool-user:cool-password@cool-mongodb.mongodb.svc.cluster.local:27017/cool-db?authSource=admin"
+
+ingress:
+  enabled: true
+  host: "api.cooldomain.com"
+  className: "nginx"
