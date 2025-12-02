@@ -28,8 +28,12 @@ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx || echo "
 helm repo add bitnami https://charts.bitnami.com/bitnami || echo "Repository already exists"
 helm repo update
 
-echo "Installing NGINX Ingress Controller"
-helm upgrade --install cool-ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace --version 4.14.0 -f helm/ingress/values.yaml
+if kubectl get ingressclass nginx &>/dev/null; then
+    echo "NGINX Ingress Controller already exists, skipping installation"
+else
+    echo "Installing NGINX Ingress Controller"
+    helm upgrade --install cool-ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace --version 4.14.0 -f helm/ingress/values.yaml
+fi
 
 echo "Waiting for NGINX Ingress to be ready"
 kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=120s
@@ -43,8 +47,11 @@ kubectl wait --namespace mongodb --for=condition=ready pod --selector=app.kubern
 echo "Building API Docker image"
 docker build -t cool-api:latest api/ -f api/Dockerfile
 
-echo "Loading image into minikube"
-minikube image load cool-api:latest
+if minikube status &>/dev/null; then
+    minikube image load cool-api:latest
+else
+    echo "Not using minikube. Push image to registry and update helm/api/values.yaml"
+fi
 
 echo "Installing Python API"
 helm upgrade --install cool-api ./helm/api -n api --create-namespace -f helm/api/values.yaml
@@ -52,8 +59,8 @@ helm upgrade --install cool-api ./helm/api -n api --create-namespace -f helm/api
 echo "Waiting for API pods to be ready"
 kubectl wait --namespace api --for=condition=ready pod --selector=app.kubernetes.io/name=api --timeout=120s
 
-echo "API ready at http://$(kubectl get ingress cool-api -n api -o jsonpath='{.spec.rules[0].host}')"
-echo "kubectl port-forward svc/cool-api -n api 8080:5000"
+echo "API ready at http://$(kubectl get ingress cool-api-api -n api -o jsonpath='{.spec.rules[0].host}' 2>/dev/null || echo 'N/A')"
+echo "kubectl port-forward svc/cool-api-api -n api 8080:5000"
 echo "http://localhost:8080/health"
 echo "MongoDB credentials:"
 echo "Username: cool-user"

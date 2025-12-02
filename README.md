@@ -13,14 +13,29 @@ Flask API with MongoDB and NGINX Ingress deployed on minikube using Helm.
 
 ## Quick Start
 
+**For minikube:**
 ```bash
 ./install.sh
 ```
 
+**For real Kubernetes clusters:**
+1. Push the image to a container registry:
+   ```bash
+   docker build -t <your-registry>/cool-api:latest api/
+   docker push <your-registry>/cool-api:latest
+   ```
+2. Update `helm/api/values.yaml` with your registry:
+   ```yaml
+   image:
+     repository: <your-registry>/cool-api
+     tag: latest
+   ```
+3. Run the install script (it will skip minikube image loading)
+
 The script will:
 - Verify required tools are installed
 - Start minikube if not running
-- Install NGINX Ingress Controller (v4.14.0)
+- Install NGINX Ingress Controller (if ingressclass does not exist) (v4.14.0)
 - Install MongoDB (v18.1.10)
 - Build and deploy the Pretty Cool Flask API
 

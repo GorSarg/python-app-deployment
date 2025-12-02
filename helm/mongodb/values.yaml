@@ -1323,7 +1323,7 @@ networkPolicy:
 persistence:
   ## @param persistence.enabled Enable MongoDB(&reg;) data persistence using PVC
   ##
-  enabled: true
+  enabled: false
   ## @param persistence.name Name of the PVC and mounted volume
   ##
   name: "datadir"
