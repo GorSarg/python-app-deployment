@@ -2,6 +2,8 @@
 
 Flask API with MongoDB and NGINX Ingress deployed on minikube using Helm.
 
+> **⚠️ Development Only**: This setup is for development/testing purposes only. For production use, implement MongoDB persistence, secure secret management (e.g., Vault, AWS Secrets Manager), TLS encryption, and proper authentication.
+
 ## Prerequisites
 
 - minikube
